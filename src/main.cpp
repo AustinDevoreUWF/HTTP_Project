@@ -3,11 +3,14 @@
 #include <netdb.h>
 #include <cstring>
 
+#define BACKLOG 10
+
 int main(){
-    int s_fd{};
+    int s_fd {}, client_fd {};//file descriptors;
     int status{};
     struct addrinfo hints{};
-    struct addrinfo *server_inf;
+    struct addrinfo *server_inf = nullptr;
+    struct sockaddr_storage incoming_sockaddr; 
 
     //start off with emptying the hints struct
     std::memset(&hints,0,sizeof(hints));
@@ -28,8 +31,18 @@ int main(){
     s_fd = socket(server_inf->ai_family,server_inf->ai_socktype,server_inf->ai_protocol);
 
     //fill in the socketStruct that holds info
-    
-    connect(s,);
-    freeaddrinfo(server_inf);
+    bind(s_fd,server_inf->ai_addr,server_inf->ai_addrlen);
+    //takes in incoming request and puts them in a queue to be taken off by accept() call.
+    //(socket_fd,num of request allowed in queue) 
+    if(listen(s_fd, BACKLOG) != -1){
+        std::cerr <<'('<<errno<<"): "<<strerror(errno)<<'\n';
+    };
+
+
+    // accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+    socklen_t incoming_sock_size = sizeof(incoming_sockaddr);
+    //accept fills in the clients socketInfo, give you the 
+    client_fd = accept(s_fd,(sockaddr*)&incoming_sockaddr, &incoming_sock_size);
+    freeaddrinfo(server_inf,);
     return 0;
 }
